@@ -25,29 +25,19 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-- name: Android SDK Kurulumu ve Gerekli Bileşenleri Yükle
-  run: |
-    yes | sdkmanager --licenses
-    sdkmanager --install "platform-tools" "platforms;android-34" "build-tools;34.0.0" "cmdline-tools;latest"
-
-      - name: Bağımlılıkları Yükle ve Web Uygulamasını Derle
+      - name: Web Uygulamasını Derle ve Android'e Aktar
         run: |
           npm install --legacy-peer-deps
           npm run build
-
-      - name: Capacitor Android Paketleyicisini Kur ve Senkronize Et
-        run: |
-          npm install --legacy-peer-deps @capacitor/core @capacitor/cli @capacitor/android
-          npx cap add android || true
           npx cap sync android
 
-      - name: Android APK Dosyasını Derle (Gradle)
+      - name: Gradle İzinlerini Ver ve APK Derle
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug
+          ./gradlew assembleDebug --no-daemon --stacktrace
 
-      - name: APK Dosyasını Çıktı Olarak Kaydet (Artifacts)
+      - name: APK Dosyasını İndirilebilir Yap (Artifacts)
         uses: actions/upload-artifact@v4
         with:
           name: TCDD-261-Saha-Asistani-APK
