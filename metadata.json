@@ -1,0 +1,6 @@
+{
+  "name": "TCDD Saha Asistanı",
+  "description": "TCDD 261 Sinyalizasyon ve Haberleşme Şefliği Saha Veri Asistanı ve Android APK/PWA Çözümü",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
