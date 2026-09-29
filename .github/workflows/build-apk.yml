@@ -19,42 +19,44 @@ jobs:
         with:
           node-version: 20
 
-      - name: Java JDK 17 Kurulumu
+      - name: Java JDK 21 Kurulumu (Capacitor 7 Gereksinimi)
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '21'
+
+      - name: Android SDK Lisanslarını Onayla
+        run: |
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses 2>/dev/null || true
 
       - name: Web Uygulamasını Derle
         run: |
           npm install --legacy-peer-deps
           npm run build
 
-      - name: Capacitor Kur ve Android Ortamını Hazırla
+      - name: Capacitor Hazırla ve Senkronize Et
         run: |
           npm install --legacy-peer-deps @capacitor/core @capacitor/cli @capacitor/android
           
-          # capacitor.config.json yoksa otomatik oluştur
           if [ ! -f "capacitor.config.json" ]; then
             echo '{"appId":"tr.gov.tcdd.saha261","appName":"TCDD 261 Saha Asistani","webDir":"dist"}' > capacitor.config.json
           fi
 
-          # android klasörü depoda yoksa otomatik üret
           if [ ! -d "android" ]; then
             npx @capacitor/cli add android
           fi
 
           npx @capacitor/cli sync android
 
-      - name: Gradle İzinlerini Ver ve APK Derle
+      - name: Gradle İle APK Derle
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon
+          ./gradlew assembleDebug --no-daemon --stacktrace -Dorg.gradle.jvmargs="-Xmx3072m"
 
       - name: APK Dosyasını İndirilebilir Yap (Artifacts)
         uses: actions/upload-artifact@v4
         with:
           name: TCDD-261-Saha-Asistani-APK
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: android/app/build/outputs/apk/**/*.apk
           retention-days: 30
