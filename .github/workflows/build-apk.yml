@@ -19,11 +19,11 @@ jobs:
         with:
           node-version: 20
 
-      - name: Java JDK 17 Kurulumu
+      - name: Java JDK 21 Kurulumu
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '21'
 
       - name: Android SDK Lisanslarını Onayla
         run: |
