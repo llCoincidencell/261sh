@@ -19,7 +19,7 @@ jobs:
         with:
           node-version: 20
 
-      - name: Java JDK 21 Kurulumu (Capacitor 7 Gereksinimi)
+      - name: Java JDK 21 Kurulumu
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
@@ -34,7 +34,7 @@ jobs:
           npm install --legacy-peer-deps
           npm run build
 
-      - name: Capacitor Hazırla ve Senkronize Et
+      - name: Capacitor Kur ve Android Ortamını Hazırla
         run: |
           npm install --legacy-peer-deps @capacitor/core @capacitor/cli @capacitor/android
           
@@ -47,6 +47,20 @@ jobs:
           fi
 
           npx @capacitor/cli sync android
+
+          # Kotlin stdlib çakışmasını (checkDebugDuplicateClasses) kökten çöz
+          echo "android.enableJetifier=true" >> android/gradle.properties
+          
+          cat << 'EOF' >> android/app/build.gradle
+
+configurations.all {
+    resolutionStrategy {
+        force "org.jetbrains.kotlin:kotlin-stdlib:1.8.22"
+        force "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.22"
+        force "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22"
+    }
+}
+EOF
 
       - name: Gradle İle APK Derle
         run: |
