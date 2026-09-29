@@ -25,17 +25,32 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Web Uygulamasını Derle ve Android'e Aktar
+      - name: Web Uygulamasını Derle
         run: |
           npm install --legacy-peer-deps
           npm run build
-          npx cap sync android
+
+      - name: Capacitor Kur ve Android Ortamını Hazırla
+        run: |
+          npm install --legacy-peer-deps @capacitor/core @capacitor/cli @capacitor/android
+          
+          # capacitor.config.json yoksa otomatik oluştur
+          if [ ! -f "capacitor.config.json" ]; then
+            echo '{"appId":"tr.gov.tcdd.saha261","appName":"TCDD 261 Saha Asistani","webDir":"dist"}' > capacitor.config.json
+          fi
+
+          # android klasörü depoda yoksa otomatik üret
+          if [ ! -d "android" ]; then
+            npx @capacitor/cli add android
+          fi
+
+          npx @capacitor/cli sync android
 
       - name: Gradle İzinlerini Ver ve APK Derle
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon --stacktrace
+          ./gradlew assembleDebug --no-daemon
 
       - name: APK Dosyasını İndirilebilir Yap (Artifacts)
         uses: actions/upload-artifact@v4
