@@ -1,1 +1,54 @@
+name: TCDD 261 Android APK Derleme
 
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build-apk:
+    name: Android APK Oluştur
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Depoyu Klonla (Checkout)
+        uses: actions/checkout@v4
+
+      - name: Node.js 20 Kurulumu
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Java JDK 17 Kurulumu
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Android SDK Kurulumu
+        uses: android-actions/setup-android@v3
+
+      - name: Bağımlılıkları Yükle ve Web Uygulamasını Derle
+        run: |
+          npm install
+          npm run build
+
+      - name: Capacitor Android Paketleyicisini Başlat
+        run: |
+          npm install @capacitor/core @capacitor/cli @capacitor/android
+          npx cap add android || true
+          npx cap sync android
+
+      - name: Android APK Dosyasını Derle (Gradle)
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: APK Dosyasını Çıktı Olarak Kaydet (Artifacts)
+        uses: actions/upload-artifact@v4
+        with:
+          name: TCDD-261-Saha-Asistani-APK
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 30
