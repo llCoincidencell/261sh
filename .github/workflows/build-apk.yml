@@ -48,6 +48,93 @@ jobs:
 
           npx @capacitor/cli sync android
 
+          # Masaüstü İkonlarını Güvenli Alanda Orantıla & Açılışı Şeffaf Yap
+          node -e "
+          const sharp = require('sharp');
+          const fs = require('fs');
+          const path = require('path');
+          const src = 'public/pwa-512x512.png';
+          
+          if (!fs.existsSync(src)) {
+            console.log('UYARI: public/pwa-512x512.png bulunamadi, logo islemleri atlandi.');
+            process.exit(0);
+          }
+          
+          const resDir = 'android/app/src/main/res';
+
+          // 1. Masaüstü İkonları
+          const iconConfigs = {
+            'mipmap-mdpi':    { canvas: 48,  iconSize: 40,  fgCanvas: 108, fgSize: 68 },
+            'mipmap-hdpi':    { canvas: 72,  iconSize: 60,  fgCanvas: 162, fgSize: 102 },
+            'mipmap-xhdpi':   { canvas: 96,  iconSize: 80,  fgCanvas: 216, fgSize: 136 },
+            'mipmap-xxhdpi':  { canvas: 144, iconSize: 120, fgCanvas: 324, fgSize: 204 },
+            'mipmap-xxxhdpi': { canvas: 192, iconSize: 160, fgCanvas: 432, fgSize: 272 },
+          };
+
+          // 2. Android Açılış Ekranı (Splash)
+          const splashConfigs = [
+            { folder: 'drawable', w: 480, h: 320, logoSize: 180 },
+            { folder: 'drawable-port-mdpi', w: 320, h: 480, logoSize: 180 },
+            { folder: 'drawable-port-hdpi', w: 480, h: 800, logoSize: 260 },
+            { folder: 'drawable-port-xhdpi', w: 720, h: 1280, logoSize: 380 },
+            { folder: 'drawable-port-xxhdpi', w: 960, h: 1600, logoSize: 500 },
+            { folder: 'drawable-port-xxxhdpi', w: 1280, h: 1920, logoSize: 640 },
+            { folder: 'drawable-land-mdpi', w: 480, h: 320, logoSize: 180 },
+            { folder: 'drawable-land-hdpi', w: 800, h: 480, logoSize: 260 },
+            { folder: 'drawable-land-xhdpi', w: 1280, h: 720, logoSize: 380 },
+            { folder: 'drawable-land-xxhdpi', w: 1600, h: 960, logoSize: 500 },
+            { folder: 'drawable-land-xxxhdpi', w: 1920, h: 1280, logoSize: 640 },
+          ];
+
+          async function run() {
+            for (const [folder, cfg] of Object.entries(iconConfigs)) {
+              const targetDir = path.join(resDir, folder);
+              if (!fs.existsSync(targetDir)) fs.mkdirSync(targetDir, { recursive: true });
+
+              const legacyLogo = await sharp(src)
+                .resize(cfg.iconSize, cfg.iconSize, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
+                .toBuffer();
+              await sharp({
+                create: { width: cfg.canvas, height: cfg.canvas, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } }
+              }).composite([{ input: legacyLogo, gravity: 'center' }]).png().toFile(path.join(targetDir, 'ic_launcher.png'));
+              await sharp({
+                create: { width: cfg.canvas, height: cfg.canvas, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } }
+              }).composite([{ input: legacyLogo, gravity: 'center' }]).png().toFile(path.join(targetDir, 'ic_launcher_round.png'));
+
+              const fgLogo = await sharp(src)
+                .resize(cfg.fgSize, cfg.fgSize, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
+                .toBuffer();
+              await sharp({
+                create: { width: cfg.fgCanvas, height: cfg.fgCanvas, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } }
+              }).composite([{ input: fgLogo, gravity: 'center' }]).png().toFile(path.join(targetDir, 'ic_launcher_foreground.png'));
+            }
+
+            for (const cfg of splashConfigs) {
+              const targetDir = path.join(resDir, cfg.folder);
+              if (!fs.existsSync(targetDir)) fs.mkdirSync(targetDir, { recursive: true });
+              const resizedLogo = await sharp(src)
+                .resize(cfg.logoSize, cfg.logoSize, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
+                .toBuffer();
+              await sharp({
+                create: {
+                  width: cfg.w,
+                  height: cfg.h,
+                  channels: 4,
+                  background: { r: 6, g: 13, b: 31, alpha: 1 }
+                }
+              })
+              .composite([{ input: resizedLogo, gravity: 'center' }])
+              .png()
+              .toFile(path.join(targetDir, 'splash.png'));
+            }
+          }
+          run();
+          "
+
+          # Varsayılan robot simgesini kaldır ve arkaplanı TCDD laciverti yap
+          rm -f android/app/src/main/res/drawable-v24/ic_launcher_foreground.xml
+          echo '<resources><color name="ic_launcher_background">#0b1633</color></resources>' > android/app/src/main/res/values/ic_launcher_background.xml
+
           # Kotlin kütüphane çakışmalarını önle
           echo "android.enableJetifier=true" >> android/gradle.properties
           
@@ -60,44 +147,6 @@ jobs:
               }
           }
           EOF
-
-      - name: Uygulama İkonunu (TCDD) Oluştur
-        run: |
-          # pwa-512x512.png yoksa scriptin çökmesini engelle
-          node -e "
-          const sharp = require('sharp');
-          const fs = require('fs');
-          const path = require('path');
-          const src = 'public/pwa-512x512.png';
-          
-          if (!fs.existsSync(src)) {
-            console.log('UYARI: public/pwa-512x512.png bulunamadi, islem atlandi.');
-            process.exit(0);
-          }
-          
-          const resDir = 'android/app/src/main/res';
-          const sizes = {
-            'mipmap-mdpi': { icon: 48, fg: 108 },
-            'mipmap-hdpi': { icon: 72, fg: 162 },
-            'mipmap-xhdpi': { icon: 96, fg: 216 },
-            'mipmap-xxhdpi': { icon: 144, fg: 324 },
-            'mipmap-xxxhdpi': { icon: 192, fg: 432 },
-          };
-          async function run() {
-            for (const [folder, dims] of Object.entries(sizes)) {
-              const targetDir = path.join(resDir, folder);
-              if (!fs.existsSync(targetDir)) fs.mkdirSync(targetDir, { recursive: true });
-              await sharp(src).resize(dims.icon, dims.icon).png().toFile(path.join(targetDir, 'ic_launcher.png'));
-              await sharp(src).resize(dims.icon, dims.icon).png().toFile(path.join(targetDir, 'ic_launcher_round.png'));
-              await sharp(src).resize(dims.fg, dims.fg).png().toFile(path.join(targetDir, 'ic_launcher_foreground.png'));
-            }
-          }
-          run();
-          "
-          
-          # Varsayılan robot simgesini kaldır ve arkaplanı TCDD laciverti yap
-          rm -f android/app/src/main/res/drawable-v24/ic_launcher_foreground.xml
-          echo '<resources><color name="ic_launcher_background">#0b1633</color></resources>' > android/app/src/main/res/values/ic_launcher_background.xml
 
       - name: Resmi İmza Anahtarını (Release Keystore) Oluştur
         run: |
