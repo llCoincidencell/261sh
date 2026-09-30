@@ -1,4 +1,4 @@
-name: TCDD 261 Android APK Derleme
+name: TCDD 261 İmzalı Android APK Derleme
 
 on:
   push:
@@ -6,8 +6,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-apk:
-    name: Android APK Oluştur
+  build-signed-apk:
+    name: İmzalı Release APK Oluştur
     runs-on: ubuntu-latest
 
     steps:
@@ -36,7 +36,7 @@ jobs:
 
       - name: Capacitor Kur ve Android Ortamını Hazırla
         run: |
-          npm install --legacy-peer-deps @capacitor/core @capacitor/cli @capacitor/android
+          npm install --legacy-peer-deps @capacitor/core @capacitor/cli @capacitor/android sharp
           
           if [ ! -f "capacitor.config.json" ]; then
             echo '{"appId":"tr.gov.tcdd.saha261","appName":"TCDD 261 Saha Asistani","webDir":"dist"}' > capacitor.config.json
@@ -48,11 +48,10 @@ jobs:
 
           npx @capacitor/cli sync android
 
-          # Kotlin stdlib çakışmasını (checkDebugDuplicateClasses) kökten çöz
+          # Kotlin kütüphane çakışmalarını önle
           echo "android.enableJetifier=true" >> android/gradle.properties
           
           cat << 'EOF' >> android/app/build.gradle
-          
           configurations.all {
               resolutionStrategy {
                   force "org.jetbrains.kotlin:kotlin-stdlib:1.8.22"
@@ -62,15 +61,71 @@ jobs:
           }
           EOF
 
-      - name: Gradle İle APK Derle
+      - name: Uygulama İkonunu (TCDD) Oluştur
+        run: |
+          # pwa-512x512.png yoksa scriptin çökmesini engelle
+          node -e "
+          const sharp = require('sharp');
+          const fs = require('fs');
+          const path = require('path');
+          const src = 'public/pwa-512x512.png';
+          
+          if (!fs.existsSync(src)) {
+            console.log('UYARI: public/pwa-512x512.png bulunamadi, islem atlandi.');
+            process.exit(0);
+          }
+          
+          const resDir = 'android/app/src/main/res';
+          const sizes = {
+            'mipmap-mdpi': { icon: 48, fg: 108 },
+            'mipmap-hdpi': { icon: 72, fg: 162 },
+            'mipmap-xhdpi': { icon: 96, fg: 216 },
+            'mipmap-xxhdpi': { icon: 144, fg: 324 },
+            'mipmap-xxxhdpi': { icon: 192, fg: 432 },
+          };
+          async function run() {
+            for (const [folder, dims] of Object.entries(sizes)) {
+              const targetDir = path.join(resDir, folder);
+              if (!fs.existsSync(targetDir)) fs.mkdirSync(targetDir, { recursive: true });
+              await sharp(src).resize(dims.icon, dims.icon).png().toFile(path.join(targetDir, 'ic_launcher.png'));
+              await sharp(src).resize(dims.icon, dims.icon).png().toFile(path.join(targetDir, 'ic_launcher_round.png'));
+              await sharp(src).resize(dims.fg, dims.fg).png().toFile(path.join(targetDir, 'ic_launcher_foreground.png'));
+            }
+          }
+          run();
+          "
+          
+          # Varsayılan robot simgesini kaldır ve arkaplanı TCDD laciverti yap
+          rm -f android/app/src/main/res/drawable-v24/ic_launcher_foreground.xml
+          echo '<resources><color name="ic_launcher_background">#0b1633</color></resources>' > android/app/src/main/res/values/ic_launcher_background.xml
+
+      - name: Resmi İmza Anahtarını (Release Keystore) Oluştur
+        run: |
+          if [ ! -f "android/app/release.keystore" ]; then
+            keytool -genkeypair -v \
+              -keystore android/app/release.keystore \
+              -alias tcdd261 \
+              -keyalg RSA \
+              -keysize 2048 \
+              -validity 10000 \
+              -storepass tcdd261pass \
+              -keypass tcdd261pass \
+              -dname "CN=TCDD 261, OU=Sinyalizasyon ve Haberlesme Sefligi, O=TCDD, L=Kayseri, C=TR"
+          fi
+
+      - name: İmzalı Release APK Derle
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon --stacktrace -Dorg.gradle.jvmargs="-Xmx3072m"
+          ./gradlew assembleRelease --no-daemon --stacktrace -Dorg.gradle.jvmargs="-Xmx3072m" \
+            -Pandroid.injected.signing.store.file=release.keystore \
+            -Pandroid.injected.signing.store.password=tcdd261pass \
+            -Pandroid.injected.signing.key.alias=tcdd261 \
+            -Pandroid.injected.signing.key.password=tcdd261pass
 
-      - name: APK Dosyasını İndirilebilir Yap (Artifacts)
+      - name: İmzalı APK'yı İndirilebilir Yap (Artifacts)
         uses: actions/upload-artifact@v4
         with:
-          name: TCDD-261-Saha-Asistani-APK
-          path: android/app/build/outputs/apk/**/*.apk
+          name: TCDD-261-Imzali-Release-APK
+          path: android/app/build/outputs/apk/release/*.apk
           retention-days: 30
