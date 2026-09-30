@@ -53,7 +53,7 @@ export const SplashScreen: React.FC<Props> = ({ onFinish, durationMs = 5000 }) =
 
       {/* Main Logo Container */}
       <div className="relative z-10 flex flex-col items-center max-w-sm text-center">
-        {/* Animated Badge Patch */}
+       {/* Animated Badge Patch */}
         <div className="relative mb-5 transform transition-all duration-700 ease-out">
           <img
             src={imgSrc}
@@ -76,7 +76,7 @@ export const SplashScreen: React.FC<Props> = ({ onFinish, durationMs = 5000 }) =
         </p>
         <div className="flex items-center gap-2 mt-2">
           <span className="text-xs text-slate-200 font-semibold tracking-wider uppercase px-3 py-1 rounded-full bg-white/10 backdrop-blur border border-white/15 shadow-sm">
-            Saha Veri Asistanı
+            Saha Veri Asistanın
           </span>
           <span className="text-[11px] font-bold text-amber-300 bg-amber-500/20 px-2 py-0.5 rounded-full border border-amber-400/30">
             {remainingSec} sn
