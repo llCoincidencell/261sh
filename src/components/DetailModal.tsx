@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Send, Building2, MapPin, Radio, ShieldAlert } from 'lucide-react';
+import { X, Send, Building2, MapPin, Radio, ShieldAlert, Activity, Zap } from 'lucide-react';
 import { RailwayItem } from '../types';
 import { bInfo } from '../data/railwayData';
 
@@ -28,7 +28,7 @@ export const DetailModal: React.FC<Props> = ({ item, onClose, vibrate }) => {
     detailKm = item.km || 'Belirtilmedi';
     typeLabel = 'CDA Kartı';
   } else {
-    titleHtml = `🛤️ Devre: ${item.code}`;
+    titleHtml = `🛤️ Ray Devreleri: ${item.code}`;
     detailKm = `${item.start_km} ile ${item.end_km} arası (${item.length} metre)`;
     typeLabel = 'Ray Devresi';
   }
@@ -37,6 +37,8 @@ export const DetailModal: React.FC<Props> = ({ item, onClose, vibrate }) => {
   wpMessage += `Varlık: ${typeLabel} - *${item.code}*\n`;
   wpMessage += `Bölge: ${item.region} / ${item.station}\n`;
   wpMessage += `Km: ${detailKm}\n`;
+  if (item.frequency) wpMessage += `Frekans: ${item.frequency}\n`;
+  if (item.capacitor) wpMessage += `Kapasitör: ${item.capacitor}\n`;
   if (item.building) wpMessage += `Bağlı Bina: ${item.building}`;
   if (bMeta && bMeta.loc) wpMessage += ` (Bina Konumu: ${bMeta.loc})\n`;
 
@@ -78,6 +80,32 @@ export const DetailModal: React.FC<Props> = ({ item, onClose, vibrate }) => {
               <span>{detailKm}</span>
             </div>
           </div>
+
+          {/* Devre Frekans ve Kapasitör Kartları */}
+          {item.type === 'devre' && (item.frequency || item.capacitor) && (
+            <div className="space-y-1">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Devre Teknik Parametreleri</span>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="p-3 bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200 dark:border-cyan-800 rounded-xl space-y-1">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-700 dark:text-cyan-400 flex items-center gap-1">
+                    <Activity className="w-3.5 h-3.5" /> Frekans
+                  </span>
+                  <p className="text-base font-extrabold text-cyan-950 dark:text-cyan-200">
+                    {item.frequency || 'Belirtilmedi'}
+                  </p>
+                </div>
+
+                <div className="p-3 bg-violet-50 dark:bg-violet-950/40 border border-violet-200 dark:border-violet-800 rounded-xl space-y-1">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-violet-700 dark:text-violet-400 flex items-center gap-1">
+                    <Zap className="w-3.5 h-3.5" /> Kapasitör
+                  </span>
+                  <p className="text-base font-extrabold text-violet-950 dark:text-violet-200">
+                    {item.capacitor || 'Belirtilmedi'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
 
           {item.building && (
             <div className="space-y-1">
