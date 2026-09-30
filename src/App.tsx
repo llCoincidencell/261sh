@@ -238,7 +238,7 @@ export default function App() {
             type="text"
             value={kmInput}
             onChange={(e) => setKmInput(e.target.value)}
-            placeholder="📍 Bulunduğunuz KM'yi buraya yazın (Örn: 142500 veya 142+500)"
+            placeholder="📍 Bulunduğunuz KM'yi buraya yazın (Örn: 142500)"
             className="w-full pl-10 pr-10 py-3 rounded-xl border border-amber-300 dark:border-amber-700/60 bg-amber-50/70 dark:bg-amber-950/30 text-amber-950 dark:text-amber-100 font-semibold text-sm placeholder:text-amber-800/60 dark:placeholder:text-amber-400/50 shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all"
           />
           {kmInput && (
