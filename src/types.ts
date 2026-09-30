@@ -25,6 +25,8 @@ export interface RailwayItem {
   centerKm: number;
   crossings?: Crossing[];
   dist?: number;
+  frequency?: string;
+  capacitor?: string;
 }
 
 export type FilterType = 'HEPSİ' | 'DEVRE' | 'SINYAL' | 'CDA' | 'GECIT';
