@@ -110,12 +110,16 @@ export default function App() {
       const iCode = item.code || '';
       const iSt = item.station || '';
       const iBld = item.building || '';
+      const iFreq = item.frequency || '';
+      const iCap = item.capacitor || '';
 
       const matchSearch = 
         !q ||
         iCode.toLowerCase().includes(q) ||
         iSt.toLowerCase().includes(q) ||
         iBld.toLowerCase().includes(q) ||
+        iFreq.toLowerCase().includes(q) ||
+        iCap.toLowerCase().includes(q) ||
         crossingText.includes(q) ||
         (q.includes('cda') && item.type === 'cda');
 
@@ -177,26 +181,34 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors pb-16 font-sans">
-      {/* 2-Second Opening Splash Screen */}
+      {/* 5-Second Opening Splash Screen */}
       {showSplash && (
-        <SplashScreen onFinish={() => setShowSplash(false)} durationMs={2000} />
+        <SplashScreen onFinish={() => setShowSplash(false)} durationMs={5000} />
       )}
 
       {/* HEADER */}
       <header className="sticky top-0 z-30 bg-gradient-to-r from-blue-900 via-blue-800 to-sky-700 text-white shadow-lg border-b border-blue-950/40">
         <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-inner shrink-0">
-              <Train className="w-6 h-6 text-sky-200" />
+            <div className="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-inner shrink-0 overflow-hidden p-1">
+              <img
+                src="./pwa-192x192.png"
+                alt="TCDD 261 Logo"
+                className="w-full h-full object-contain"
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src = './tcdd-logo.svg';
+                }}
+              />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-base sm:text-lg font-extrabold tracking-tight">TCDD 261 Sinyalizasyon ve Haberleşme Şefliği </h1>
+                <h1 className="text-base sm:text-lg font-extrabold tracking-tight">TCDD 261 SH Şefliği</h1>
                 <span className="hidden sm:inline-block text-[11px] font-semibold bg-sky-500/30 text-sky-200 px-2 py-0.5 rounded-full border border-sky-400/30">
                   Sinyalizasyon & Haberleşme
                 </span>
               </div>
-              <p className="text-xs text-sky-200 font-medium">Saha Veri Asistanınız </p>
+              <p className="text-xs text-sky-200 font-medium">Saha Veri Asistanın </p>
             </div>
           </div>
 
@@ -226,7 +238,7 @@ export default function App() {
             type="text"
             value={kmInput}
             onChange={(e) => setKmInput(e.target.value)}
-            placeholder="📍 Bulunduğunuz KM'yi buraya yazın (Örn: 142500 )"
+            placeholder="📍 Bulunduğunuz KM'yi buraya yazın (Örn: 142500 veya 142+500)"
             className="w-full pl-10 pr-10 py-3 rounded-xl border border-amber-300 dark:border-amber-700/60 bg-amber-50/70 dark:bg-amber-950/30 text-amber-950 dark:text-amber-100 font-semibold text-sm placeholder:text-amber-800/60 dark:placeholder:text-amber-400/50 shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all"
           />
           {kmInput && (
@@ -281,7 +293,7 @@ export default function App() {
                 : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
             }`}
           >
-            🛤️ Ray Devreleri
+            🛤️ Sinyal Devreleri
           </button>
           <button
             onClick={() => { vibrate(); setCurrentType('SINYAL'); }}
@@ -453,10 +465,26 @@ export default function App() {
                     )}
 
                     {item.type === 'devre' && (
-                      <div className="space-y-1">
+                      <div className="space-y-1.5">
                         <div className="inline-flex items-center gap-1 text-xs font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 px-2 py-0.5 rounded-md">
                           🛣️ Km: {item.start_km} - {item.end_km} ({item.length}m)
                         </div>
+
+                        {(item.frequency || item.capacitor) && (
+                          <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+                            {item.frequency && (
+                              <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-md bg-cyan-50 dark:bg-cyan-950/60 text-cyan-800 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-800/80">
+                                ⚡ {item.frequency}
+                              </span>
+                            )}
+                            {item.capacitor && (
+                              <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-md bg-violet-50 dark:bg-violet-950/60 text-violet-800 dark:text-violet-300 border border-violet-200 dark:border-violet-800/80">
+                                🔋 {item.capacitor}
+                              </span>
+                            )}
+                          </div>
+                        )}
+
                         {item.crossings && item.crossings.length > 0 && (
                           <div className="flex flex-wrap gap-1 mt-1">
                             {item.crossings.map((c, idx) => (
