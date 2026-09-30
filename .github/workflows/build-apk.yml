@@ -118,7 +118,7 @@ jobs:
           cd android
           chmod +x gradlew
           ./gradlew assembleRelease --no-daemon --stacktrace -Dorg.gradle.jvmargs="-Xmx3072m" \
-            -Pandroid.injected.signing.store.file=release.keystore \
+            -Pandroid.injected.signing.store.file="$PWD/app/release.keystore" \
             -Pandroid.injected.signing.store.password=tcdd261pass \
             -Pandroid.injected.signing.key.alias=tcdd261 \
             -Pandroid.injected.signing.key.password=tcdd261pass
