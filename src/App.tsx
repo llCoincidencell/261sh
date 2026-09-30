@@ -191,12 +191,12 @@ export default function App() {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-base sm:text-lg font-extrabold tracking-tight">TCDD 261</h1>
+                <h1 className="text-base sm:text-lg font-extrabold tracking-tight">TCDD 261 Sinyalizasyon ve Haberleşme Şefliği </h1>
                 <span className="hidden sm:inline-block text-[11px] font-semibold bg-sky-500/30 text-sky-200 px-2 py-0.5 rounded-full border border-sky-400/30">
                   Sinyalizasyon & Haberleşme
                 </span>
               </div>
-              <p className="text-xs text-sky-200 font-medium">Saha Veri Asistanı</p>
+              <p className="text-xs text-sky-200 font-medium">Saha Veri Asistanınız </p>
             </div>
           </div>
 
@@ -226,7 +226,7 @@ export default function App() {
             type="text"
             value={kmInput}
             onChange={(e) => setKmInput(e.target.value)}
-            placeholder="📍 Bulunduğunuz KM'yi buraya yazın (Örn: 142500 veya 142+500)"
+            placeholder="📍 Bulunduğunuz KM'yi buraya yazın (Örn: 142500 )"
             className="w-full pl-10 pr-10 py-3 rounded-xl border border-amber-300 dark:border-amber-700/60 bg-amber-50/70 dark:bg-amber-950/30 text-amber-950 dark:text-amber-100 font-semibold text-sm placeholder:text-amber-800/60 dark:placeholder:text-amber-400/50 shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all"
           />
           {kmInput && (
