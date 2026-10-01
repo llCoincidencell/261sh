@@ -4,9 +4,15 @@ import path from 'path';
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
+// Kodun GitHub Actions'ta mı yoksa senin bilgisayarında mı (APK için) çalıştığını algılar
+const isGitHub = process.env.GITHUB_ACTIONS === 'true';
+
+// GitHub'daysa '/261sh/', değilse (APK) './' kullanır.
+const basePath = isGitHub ? '/261sh/' : './';
+
 export default defineConfig(() => {
   return {
-    base: './', // Burası doğru, ellemeyelim
+    base: basePath,
     plugins: [
       react(),
       tailwindcss(),
@@ -14,7 +20,7 @@ export default defineConfig(() => {
         registerType: 'autoUpdate',
         includeAssets: ['apple-touch-icon.png', 'icon.svg'],
         manifest: {
-          id: './', // KÖK DİZİN DÜZELTİLDİ
+          id: basePath,
           name: 'TCDD 261 Sinyalizasyon ve Haberleşme Şefliği',
           short_name: 'TCDD Saha',
           description: 'TCDD 261 Sinyalizasyon ve Haberleşme Şefliği Saha Veri Asistanı',
@@ -22,11 +28,11 @@ export default defineConfig(() => {
           background_color: '#0f172a',
           display: 'standalone',
           orientation: 'portrait',
-          start_url: './', // KÖK DİZİN DÜZELTİLDİ
-          scope: './',     // KÖK DİZİN DÜZELTİLDİ
+          start_url: basePath,
+          scope: basePath,
           icons: [
             {
-              src: 'pwa-192x192.png', // BAŞTAKİ EĞİK ÇİZGİLER KALDIRILDI
+              src: 'pwa-192x192.png',
               sizes: '192x192',
               type: 'image/png',
               purpose: 'any',
