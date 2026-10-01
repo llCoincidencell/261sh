@@ -1,15 +1,25 @@
-name: TCDD 261 iOS Derleme
+name: GitHub Pages ile Canlı Yayınla (PWA ve Web)
 
 on:
   push:
     branches: [ main, master ]
   workflow_dispatch:
 
-jobs:
-  build-ios:
-    name: iOS Uygulaması Oluştur (macOS)
-    runs-on: macos-14
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
     steps:
       - name: Depoyu Klonla
         uses: actions/checkout@v4
@@ -17,63 +27,24 @@ jobs:
       - name: Node.js Kurulumu
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 20
 
-      - name: Web Uygulamasını Derle
+      - name: Web Uygulamasını Derle ve GitHub Pages'e Hazırla
         run: |
           npm install --legacy-peer-deps
           npm run build
-
-      - name: Capacitor iOS Kur ve Senkronize Et
-        run: |
-          npm install --legacy-peer-deps @capacitor/core @capacitor/cli @capacitor/ios
           
-          if [ ! -f "capacitor.config.json" ]; then
-            echo '{"appId":"tr.gov.tcdd.saha261","appName":"TCDD 261 Saha Asistani","webDir":"dist"}' > capacitor.config.json
-          fi
+          # GitHub Pages'in _assets gibi klasörleri yok saymasını engelle
+          touch dist/.nojekyll
 
-          if [ ! -d "ios" ]; then
-            npx @capacitor/cli add ios
-          fi
+      - name: GitHub Pages Yapılandır
+        uses: actions/configure-pages@v5
 
-          npx @capacitor/cli sync ios
-
-      - name: CocoaPods Bağımlılıklarını Yükle
-        run: |
-          cd ios/App
-          pod install
-
-      - name: Xcode ile iOS Projesini Derle (İmzasız)
-        run: |
-          cd ios/App
-          xcodebuild clean build \
-            -workspace App.xcworkspace \
-            -scheme App \
-            -configuration Release \
-            -destination 'generic/platform=iOS' \
-            -allowProvisioningUpdates \
-            CODE_SIGNING_ALLOWED=NO \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGN_IDENTITY=""
-
-      - name: Çıktıyı IPA Formatında Paketle
-        run: |
-          cd ios/App
-          # xcodebuild çıktısını bul (genellikle build/Release-iphoneos/App.app içindedir)
-          APP_PATH=$(find build/Release-iphoneos -name "*.app" | head -n 1)
-          
-          # IPA için zorunlu olan Payload klasörünü oluştur
-          mkdir -p Payload
-          
-          # .app bundle'ını Payload klasörünün içine kopyala
-          cp -R "$APP_PATH" Payload/
-          
-          # Payload klasörünü zipleyerek .ipa uzantılı dosya oluştur
-          zip -r TCDD-261-Saha-Asistani.ipa Payload
-
-      - name: iOS Dosyalarını İndirilebilir Yap (Artifacts)
-        uses: actions/upload-artifact@v4
+      - name: Dağıtım Dosyalarını Yükle
+        uses: actions/upload-pages-artifact@v3
         with:
-          name: TCDD-261-iOS-Unsigned-IPA
-          path: ios/App/TCDD-261-Saha-Asistani.ipa
-          retention-days: 30
+          path: './dist'
+
+      - name: GitHub Pages Canlı Yayına Al
+        id: deployment
+        uses: actions/deploy-pages@v4
