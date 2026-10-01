@@ -1,0 +1,79 @@
+name: TCDD 261 iOS Derleme
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build-ios:
+    name: iOS Uygulaması Oluştur (macOS)
+    runs-on: macos-14
+
+    steps:
+      - name: Depoyu Klonla
+        uses: actions/checkout@v4
+
+      - name: Node.js Kurulumu
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Web Uygulamasını Derle
+        run: |
+          npm install --legacy-peer-deps
+          npm run build
+
+      - name: Capacitor iOS Kur ve Senkronize Et
+        run: |
+          npm install --legacy-peer-deps @capacitor/core @capacitor/cli @capacitor/ios
+          
+          if [ ! -f "capacitor.config.json" ]; then
+            echo '{"appId":"tr.gov.tcdd.saha261","appName":"TCDD 261 Saha Asistani","webDir":"dist"}' > capacitor.config.json
+          fi
+
+          if [ ! -d "ios" ]; then
+            npx @capacitor/cli add ios
+          fi
+
+          npx @capacitor/cli sync ios
+
+      - name: CocoaPods Bağımlılıklarını Yükle
+        run: |
+          cd ios/App
+          pod install
+
+      - name: Xcode ile iOS Projesini Derle (İmzasız)
+        run: |
+          cd ios/App
+          xcodebuild clean build \
+            -workspace App.xcworkspace \
+            -scheme App \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -allowProvisioningUpdates \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY=""
+
+      - name: Çıktıyı IPA Formatında Paketle
+        run: |
+          cd ios/App
+          # xcodebuild çıktısını bul (genellikle build/Release-iphoneos/App.app içindedir)
+          APP_PATH=$(find build/Release-iphoneos -name "*.app" | head -n 1)
+          
+          # IPA için zorunlu olan Payload klasörünü oluştur
+          mkdir -p Payload
+          
+          # .app bundle'ını Payload klasörünün içine kopyala
+          cp -R "$APP_PATH" Payload/
+          
+          # Payload klasörünü zipleyerek .ipa uzantılı dosya oluştur
+          zip -r TCDD-261-Saha-Asistani.ipa Payload
+
+      - name: iOS Dosyalarını İndirilebilir Yap (Artifacts)
+        uses: actions/upload-artifact@v4
+        with:
+          name: TCDD-261-iOS-Unsigned-IPA
+          path: ios/App/TCDD-261-Saha-Asistani.ipa
+          retention-days: 30
