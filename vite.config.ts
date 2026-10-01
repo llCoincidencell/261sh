@@ -5,8 +5,8 @@ import { defineConfig } from 'vite';
 
 export default defineConfig(() => {
   return {
-    // Hem Android APK hem GitHub Pages için en hatasız yol ayarı
-    base: './',
+    // Web için '/261sh/', Android APK için varsayılan olarak './' kullanacak
+    base: process.env.BASE_PATH || './',
     plugins: [
       react(),
       tailwindcss()
