@@ -5,7 +5,8 @@ import { defineConfig } from 'vite';
 
 export default defineConfig(() => {
   return {
-    base: process.env.GITHUB_ACTIONS === 'true' ? '/261sh/' : './',
+    // GitHub Pages için yolu doğrudan depo adıyla sabitliyoruz
+    base: '/261sh/',
     plugins: [
       react(),
       tailwindcss()
@@ -14,10 +15,6 @@ export default defineConfig(() => {
       alias: {
         '@': path.resolve(__dirname, '.'),
       },
-    },
-    server: {
-      hmr: process.env.DISABLE_HMR !== 'true',
-      watch: process.env.DISABLE_HMR === 'true' ? null : {},
     },
   };
 });
