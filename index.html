@@ -4,31 +4,21 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>TCDD 261 Sinyalizasyon ve Haberleşme Şefliği</title>
-    <meta name="description" content="TCDD 261 Sinyalizasyon ve Haberleşme Şefliği Saha Veri Asistanı ve Android APK/PWA Çözümü" />
+    <meta name="description" content="TCDD 261 Sinyalizasyon ve Haberleşme Şefliği Saha Veri Asistanı" />
     <meta name="theme-color" content="#1e3a8a" id="metaThemeColor" />
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="TCDD Saha" />
-
-    <!-- HATA YAKALAYICI (BEYAZ EKRANIN SEBEBİNİ BULMAK İÇİN) -->
+    
+    <!-- Hata Yakalayıcı -->
     <script>
       window.addEventListener('error', function(e) {
         alert('HATA KODU:\n' + e.message + '\nDosya: ' + e.filename + '\nSatır: ' + e.lineno);
       });
       window.addEventListener('unhandledrejection', function(e) {
-        alert('GİZLİ HATA (Promise):\n' + (e.reason && e.reason.message ? e.reason.message : e.reason));
+        alert('GİZLİ HATA:\n' + (e.reason && e.reason.message ? e.reason.message : e.reason));
       });
     </script>
 
-    <!-- İkon yolları göreceli (relative) yapıldı -->
     <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
     <link rel="icon" type="image/svg+xml" href="./icon.svg" />
-    
-    <meta property="og:title" content="TCDD 261 Sinyalizasyon ve Haberleşme Şefliği" />
-    <meta property="og:description" content="TCDD 261 Sinyalizasyon ve Haberleşme Şefliği Saha Veri Asistanı ve Android APK/PWA Çözümü" />
-    <meta property="og:type" content="website" />
-    <meta name="twitter:card" content="summary_large_image" />
     
     <script>
       (function() {
@@ -43,7 +33,6 @@
   </head>
   <body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen">
     <div id="root"></div>
-    <!-- Vite bu yolu otomatik olarak ayarlayacaktır, dokunmuyoruz -->
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
