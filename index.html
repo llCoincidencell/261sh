@@ -4,12 +4,41 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>TCDD 261 Sinyalizasyon ve Haberleşme Şefliği</title>
+    
+    <!-- PWA ÖNBELLEK İMHA KODU (ÖLÜM DÖNGÜSÜNÜ KIRAR) -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+          for (var i = 0; i < registrations.length; i++) {
+            registrations[i].unregister();
+          }
+          // Eğer inatçı bir servis bulundu ve silindiyse, sayfayı en güncel haliyle zorla yenile
+          if (registrations.length > 0) {
+            window.location.href = window.location.pathname + '?t=' + new Date().getTime();
+          }
+        });
+      }
+    </script>
+
+    <!-- HATA YAKALAYICI -->
+    <script>
+      window.onerror = function(msg, url, line) {
+        var root = document.getElementById('root');
+        if(root) {
+          root.innerHTML = '<div style="padding:20px; color:#991b1b; background-color:#fef2f2; height:100vh; font-family:sans-serif;"><h3>🚨 HATA OLUŞTU</h3><p>' + msg + '</p><p>Satır: ' + line + '</p></div>';
+        }
+      };
+    </script>
+
     <meta name="theme-color" content="#1e3a8a" />
-    <link rel="apple-touch-icon" href="/261sh/apple-touch-icon.png" />
-    <link rel="icon" type="image/svg+xml" href="/261sh/icon.svg" />
   </head>
-  <body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen">
-    <div id="root"></div>
+  <body class="bg-slate-50 min-h-screen">
+    <div id="root">
+      <div style="text-align:center; padding-top:60px; font-family:sans-serif;">
+        <h2 style="color:#1e3a8a; font-weight:bold;">Sistem Temizleniyor ve Yükleniyor...</h2>
+        <p style="color:gray; font-size:12px; margin-top:10px;">Eski önbellek temizleniyor, lütfen bekleyin.</p>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
