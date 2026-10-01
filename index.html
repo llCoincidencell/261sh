@@ -4,35 +4,18 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>TCDD 261 Sinyalizasyon ve Haberleşme Şefliği</title>
-    <meta name="description" content="TCDD 261 Sinyalizasyon ve Haberleşme Şefliği Saha Veri Asistanı" />
     <meta name="theme-color" content="#1e3a8a" id="metaThemeColor" />
-    
-    <!-- Hata Yakalayıcı -->
-    <script>
-      window.addEventListener('error', function(e) {
-        alert('HATA KODU:\n' + e.message + '\nDosya: ' + e.filename + '\nSatır: ' + e.lineno);
-      });
-      window.addEventListener('unhandledrejection', function(e) {
-        alert('GİZLİ HATA:\n' + (e.reason && e.reason.message ? e.reason.message : e.reason));
-      });
-    </script>
-
-    <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
-    <link rel="icon" type="image/svg+xml" href="./icon.svg" />
-    
-    <script>
-      (function() {
-        var theme = localStorage.getItem('tcdd_theme');
-        if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-          document.documentElement.classList.add('dark');
-        } else {
-          document.documentElement.classList.remove('dark');
-        }
-      })();
-    </script>
+    <link rel="apple-touch-icon" href="/261sh/apple-touch-icon.png" />
+    <link rel="icon" type="image/svg+xml" href="/261sh/icon.svg" />
   </head>
   <body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen">
-    <div id="root"></div>
+    <div id="root">
+      <!-- UYGULAMA YÜKLENEMEZSE BU YAZI EKRANDA KALACAK -->
+      <div style="text-align:center; padding-top:40px; font-family:sans-serif;">
+        <h2 style="color:#1e3a8a; font-weight:bold;">Saha Asistanı Yükleniyor...</h2>
+        <p style="color:gray; font-size:12px; margin-top:10px;">(Eğer bu yazı ekranda kalıyorsa, arka plan dosyaları bulunamıyor demektir)</p>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
