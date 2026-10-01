@@ -4,8 +4,8 @@ import path from 'path';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  // GitHub deponun tam adını veriyoruz
-  base: '/261sh/',
+  // Tüm platformlarda (Web ve APK) kusursuz çalışan göreceli yol
+  base: './',
   plugins: [
     react(),
     tailwindcss()
