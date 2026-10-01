@@ -1,180 +1,44 @@
-name: TCDD 261 İmzalı Android APK Derleme
+name: Web Sitesini Yayınla (GitHub Pages)
 
 on:
   push:
-    branches: [ main, master ]
-  workflow_dispatch:
+    branches: ["main"] # veya master kullanıyorsan master yap
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 
 jobs:
-  build-signed-apk:
-    name: İmzalı Release APK Oluştur
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-
     steps:
-      - name: Depoyu Klonla (Checkout)
+      - name: Kodu Klonla
         uses: actions/checkout@v4
 
-      - name: Node.js 20 Kurulumu
+      - name: Node.js Kurulumu
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      - name: Java JDK 21 Kurulumu
-        uses: actions/setup-java@v4
+      - name: Bağımlılıkları Yükle
+        run: npm install --legacy-peer-deps
+
+      - name: Web İçin Derle
+        run: npm run build
+
+      - name: GitHub Pages Ayarları
+        uses: actions/configure-pages@v5
+
+      - name: Dosyaları Yükle
+        uses: actions/upload-pages-artifact@v3
         with:
-          distribution: 'temurin'
-          java-version: '21'
+          path: './dist'
 
-      - name: Android SDK Lisanslarını Onayla
-        run: |
-          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses 2>/dev/null || true
-
-      - name: Web Uygulamasını Derle
-        run: |
-          npm install --legacy-peer-deps
-          npm run build
-
-      - name: Capacitor Kur ve Android Ortamını Hazırla
-        run: |
-          npm install --legacy-peer-deps @capacitor/core @capacitor/cli @capacitor/android sharp
-          
-          if [ ! -f "capacitor.config.json" ]; then
-            echo '{"appId":"tr.gov.tcdd.saha261","appName":"TCDD 261 Saha Asistani","webDir":"dist"}' > capacitor.config.json
-          fi
-
-          if [ ! -d "android" ]; then
-            npx @capacitor/cli add android
-          fi
-
-          npx @capacitor/cli sync android
-
-          # Masaüstü İkonlarını Güvenli Alanda Orantıla & Açılışı Şeffaf Yap
-          node -e "
-          const sharp = require('sharp');
-          const fs = require('fs');
-          const path = require('path');
-          const src = 'public/pwa-512x512.png';
-          
-          if (!fs.existsSync(src)) {
-            console.log('UYARI: public/pwa-512x512.png bulunamadi, logo islemleri atlandi.');
-            process.exit(0);
-          }
-          
-          const resDir = 'android/app/src/main/res';
-
-          // 1. Masaüstü İkonları
-          const iconConfigs = {
-            'mipmap-mdpi':    { canvas: 48,  iconSize: 40,  fgCanvas: 108, fgSize: 68 },
-            'mipmap-hdpi':    { canvas: 72,  iconSize: 60,  fgCanvas: 162, fgSize: 102 },
-            'mipmap-xhdpi':   { canvas: 96,  iconSize: 80,  fgCanvas: 216, fgSize: 136 },
-            'mipmap-xxhdpi':  { canvas: 144, iconSize: 120, fgCanvas: 324, fgSize: 204 },
-            'mipmap-xxxhdpi': { canvas: 192, iconSize: 160, fgCanvas: 432, fgSize: 272 },
-          };
-
-          // 2. Android Açılış Ekranı (Splash)
-          const splashConfigs = [
-            { folder: 'drawable', w: 480, h: 320, logoSize: 180 },
-            { folder: 'drawable-port-mdpi', w: 320, h: 480, logoSize: 180 },
-            { folder: 'drawable-port-hdpi', w: 480, h: 800, logoSize: 260 },
-            { folder: 'drawable-port-xhdpi', w: 720, h: 1280, logoSize: 380 },
-            { folder: 'drawable-port-xxhdpi', w: 960, h: 1600, logoSize: 500 },
-            { folder: 'drawable-port-xxxhdpi', w: 1280, h: 1920, logoSize: 640 },
-            { folder: 'drawable-land-mdpi', w: 480, h: 320, logoSize: 180 },
-            { folder: 'drawable-land-hdpi', w: 800, h: 480, logoSize: 260 },
-            { folder: 'drawable-land-xhdpi', w: 1280, h: 720, logoSize: 380 },
-            { folder: 'drawable-land-xxhdpi', w: 1600, h: 960, logoSize: 500 },
-            { folder: 'drawable-land-xxxhdpi', w: 1920, h: 1280, logoSize: 640 },
-          ];
-
-          async function run() {
-            for (const [folder, cfg] of Object.entries(iconConfigs)) {
-              const targetDir = path.join(resDir, folder);
-              if (!fs.existsSync(targetDir)) fs.mkdirSync(targetDir, { recursive: true });
-
-              const legacyLogo = await sharp(src)
-                .resize(cfg.iconSize, cfg.iconSize, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
-                .toBuffer();
-              await sharp({
-                create: { width: cfg.canvas, height: cfg.canvas, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } }
-              }).composite([{ input: legacyLogo, gravity: 'center' }]).png().toFile(path.join(targetDir, 'ic_launcher.png'));
-              await sharp({
-                create: { width: cfg.canvas, height: cfg.canvas, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } }
-              }).composite([{ input: legacyLogo, gravity: 'center' }]).png().toFile(path.join(targetDir, 'ic_launcher_round.png'));
-
-              const fgLogo = await sharp(src)
-                .resize(cfg.fgSize, cfg.fgSize, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
-                .toBuffer();
-              await sharp({
-                create: { width: cfg.fgCanvas, height: cfg.fgCanvas, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } }
-              }).composite([{ input: fgLogo, gravity: 'center' }]).png().toFile(path.join(targetDir, 'ic_launcher_foreground.png'));
-            }
-
-            for (const cfg of splashConfigs) {
-              const targetDir = path.join(resDir, cfg.folder);
-              if (!fs.existsSync(targetDir)) fs.mkdirSync(targetDir, { recursive: true });
-              const resizedLogo = await sharp(src)
-                .resize(cfg.logoSize, cfg.logoSize, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
-                .toBuffer();
-              await sharp({
-                create: {
-                  width: cfg.w,
-                  height: cfg.h,
-                  channels: 4,
-                  background: { r: 6, g: 13, b: 31, alpha: 1 }
-                }
-              })
-              .composite([{ input: resizedLogo, gravity: 'center' }])
-              .png()
-              .toFile(path.join(targetDir, 'splash.png'));
-            }
-          }
-          run();
-          "
-
-          # Varsayılan robot simgesini kaldır ve arkaplanı TCDD laciverti yap
-          rm -f android/app/src/main/res/drawable-v24/ic_launcher_foreground.xml
-          echo '<resources><color name="ic_launcher_background">#0b1633</color></resources>' > android/app/src/main/res/values/ic_launcher_background.xml
-
-          # Kotlin kütüphane çakışmalarını önle
-          echo "android.enableJetifier=true" >> android/gradle.properties
-          
-          cat << 'EOF' >> android/app/build.gradle
-          configurations.all {
-              resolutionStrategy {
-                  force "org.jetbrains.kotlin:kotlin-stdlib:1.8.22"
-                  force "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.22"
-                  force "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22"
-              }
-          }
-          EOF
-
-      - name: Resmi İmza Anahtarını (Release Keystore) Oluştur
-        run: |
-          if [ ! -f "android/app/release.keystore" ]; then
-            keytool -genkeypair -v \
-              -keystore android/app/release.keystore \
-              -alias tcdd261 \
-              -keyalg RSA \
-              -keysize 2048 \
-              -validity 10000 \
-              -storepass tcdd261pass \
-              -keypass tcdd261pass \
-              -dname "CN=TCDD 261, OU=Sinyalizasyon ve Haberlesme Sefligi, O=TCDD, L=Kayseri, C=TR"
-          fi
-
-      - name: İmzalı Release APK Derle
-        run: |
-          cd android
-          chmod +x gradlew
-          ./gradlew assembleRelease --no-daemon --stacktrace -Dorg.gradle.jvmargs="-Xmx3072m" \
-            -Pandroid.injected.signing.store.file="$PWD/app/release.keystore" \
-            -Pandroid.injected.signing.store.password=tcdd261pass \
-            -Pandroid.injected.signing.key.alias=tcdd261 \
-            -Pandroid.injected.signing.key.password=tcdd261pass
-
-      - name: İmzalı APK'yı İndirilebilir Yap (Artifacts)
-        uses: actions/upload-artifact@v4
-        with:
-          name: TCDD-261-Imzali-Release-APK
-          path: android/app/build/outputs/apk/release/*.apk
-          retention-days: 30
+      - name: Yayına Al
+        id: deployment
+        uses: actions/deploy-pages@v4
+        
