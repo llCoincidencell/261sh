@@ -29,10 +29,10 @@ jobs:
         with:
           node-version: 20
 
-      - name: Web Uygulamasını Derle ve GitHub Pages'e Hazırla
+      - name: Web Uygulamasını Derle (Zorunlu Base Yoluyla)
         run: |
           npm install --legacy-peer-deps
-          BASE_PATH=/261sh/ npm run build
+          npx vite build --base=/261sh/
           touch dist/.nojekyll
 
       - name: GitHub Pages Yapılandır
