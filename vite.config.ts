@@ -5,8 +5,8 @@ import { defineConfig } from 'vite';
 
 export default defineConfig(() => {
   return {
-    // GitHub Pages için yolu doğrudan depo adıyla sabitliyoruz
-    base: '/261sh/',
+    // Hem Android APK hem GitHub Pages için en hatasız yol ayarı
+    base: './',
     plugins: [
       react(),
       tailwindcss()
