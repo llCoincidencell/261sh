@@ -5,29 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>TCDD 261 Sinyalizasyon ve Haberleşme Şefliği</title>
     
-    <!-- PWA ÖNBELLEK İMHA KODU (ÖLÜM DÖNGÜSÜNÜ KIRAR) -->
+    <!-- MOBİL İÇİN EKRAN İÇİ GELİŞTİRİCİ KONSOLU (vConsole) -->
+    <script src="https://unpkg.com/vconsole@latest/dist/vconsole.min.js"></script>
     <script>
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.getRegistrations().then(function(registrations) {
-          for (var i = 0; i < registrations.length; i++) {
-            registrations[i].unregister();
-          }
-          // Eğer inatçı bir servis bulundu ve silindiyse, sayfayı en güncel haliyle zorla yenile
-          if (registrations.length > 0) {
-            window.location.href = window.location.pathname + '?t=' + new Date().getTime();
-          }
-        });
-      }
-    </script>
-
-    <!-- HATA YAKALAYICI -->
-    <script>
-      window.onerror = function(msg, url, line) {
-        var root = document.getElementById('root');
-        if(root) {
-          root.innerHTML = '<div style="padding:20px; color:#991b1b; background-color:#fef2f2; height:100vh; font-family:sans-serif;"><h3>🚨 HATA OLUŞTU</h3><p>' + msg + '</p><p>Satır: ' + line + '</p></div>';
-        }
-      };
+      // Sitedeki tüm gizli hataları ekrana basacak olan konsolu başlat
+      var vConsole = new window.VConsole();
     </script>
 
     <meta name="theme-color" content="#1e3a8a" />
@@ -35,8 +17,8 @@
   <body class="bg-slate-50 min-h-screen">
     <div id="root">
       <div style="text-align:center; padding-top:60px; font-family:sans-serif;">
-        <h2 style="color:#1e3a8a; font-weight:bold;">Sistem Temizleniyor ve Yükleniyor...</h2>
-        <p style="color:gray; font-size:12px; margin-top:10px;">Eski önbellek temizleniyor, lütfen bekleyin.</p>
+        <h2 style="color:#1e3a8a; font-weight:bold;">Sistem Analiz Ediliyor...</h2>
+        <p style="color:gray; font-size:12px; margin-top:10px;">Lütfen sağ alttaki yeşil "vConsole" butonuna tıklayın.</p>
       </div>
     </div>
     <script type="module" src="/src/main.tsx"></script>
