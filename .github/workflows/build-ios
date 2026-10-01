@@ -1,4 +1,4 @@
-name: GitHub Pages ile Canlı Yayınla (PWA ve Web)
+name: GitHub Pages ile Canlı Yayınla (Web)
 
 on:
   push:
@@ -32,9 +32,7 @@ jobs:
       - name: Web Uygulamasını Derle ve GitHub Pages'e Hazırla
         run: |
           npm install --legacy-peer-deps
-          npm run build
-          
-          # GitHub Pages'in _assets gibi klasörleri yok saymasını engelle
+          BASE_PATH=/261sh/ npm run build
           touch dist/.nojekyll
 
       - name: GitHub Pages Yapılandır
