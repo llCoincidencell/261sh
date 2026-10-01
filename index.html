@@ -4,34 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>TCDD 261 Sinyalizasyon ve Haberleşme Şefliği</title>
-    
-    <!-- EKRANA HATA YAZDIRICI: Hata varsa ekranı kırmızıya boyar ve sebebi yazar -->
-    <script>
-      window.onerror = function(msg, url, line) {
-        document.getElementById('root').innerHTML = 
-          '<div style="padding:20px; color:#991b1b; background-color:#fef2f2; height:100vh; font-family:sans-serif;">' +
-          '<h3 style="font-weight:bold; font-size:18px;">🚨 KOD ÇÖKTÜ (SÖZ DİZİMİ HATASI)</h3>' +
-          '<p style="margin-top:10px; font-weight:bold;">' + msg + '</p>' +
-          '<p style="font-size:12px; margin-top:10px;">Dosya: ' + url + '</p>' +
-          '<p style="font-size:12px;">Satır: ' + line + '</p>' +
-          '</div>';
-        return false;
-      };
-    </script>
+    <meta name="theme-color" content="#1e3a8a" />
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+    <link rel="icon" type="image/svg+xml" href="./icon.svg" />
   </head>
-  <body class="bg-slate-50 min-h-screen">
-    <div id="root">
-      <div style="text-align:center; padding-top:40px; font-family:sans-serif;">
-        <h2 style="color:#1e3a8a; font-weight:bold;">Saha Asistanı Yükleniyor...</h2>
-        <p style="color:gray; font-size:12px; margin-top:5px;">(Eğer ekran kırmızı olmazsa ve bu yazı kalırsa sorun farklıdır)</p>
-      </div>
-    </div>
-    
-    <!-- SCRIPT BULUNAMAZSA EKRANA 404 YAZDIRACAK -->
-    <script 
-      type="module" 
-      src="/src/main.tsx" 
-      onerror="document.getElementById('root').innerHTML = '<div style=\'padding:20px; color:#991b1b; background-color:#fef2f2; height:100vh; font-family:sans-serif;\'><h3 style=\'font-weight:bold; font-size:18px;\'>🚨 DOSYA BULUNAMADI (404)</h3><p style=\'margin-top:10px;\'>GitHub sunucusu JavaScript dosyanızı bulamadı. Base yolu sorun yaratıyor.</p></div>'"
-    ></script>
+  <body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
